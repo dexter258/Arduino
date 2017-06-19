@@ -2,7 +2,7 @@
 #include "Adafruit_MCP23017.h"
 
 boolean start=true;
-
+int poziom=128;
 
 Adafruit_MCP23017 mcp;
 #define lewo A0
@@ -11,7 +11,7 @@ Adafruit_MCP23017 mcp;
 #define dol 7
 #define strzal 8
 #define stycznik 4
-byte x;
+int x;
 boolean Joystick[5];
 
 boolean left=false;
@@ -38,7 +38,7 @@ boolean pauza_strzelania_boki=false;
 boolean wygaszenie_strzal_boki=false;
 boolean    wygaszenie_boki=false;
 long czas_na_strzal_boki=2400;    
-long czas_po_strzale_boki=500;
+long czas_po_strzale_boki=380;
 
 long po_strzale_boki;
 long czas_pauzy_pomiedzy_strzalami_boki=6000;        // pozniej jest losowanie boki
@@ -69,23 +69,25 @@ pinMode(strzal,INPUT);
 
 void loop() {
   
-  
+  /*
+  Serial.println(digitalRead(gora));
+  Serial.println(digitalRead(dol));
   Serial.println(digitalRead(lewo));
 Serial.println(digitalRead(prawo));
-Serial.println(digitalRead(gora));
-Serial.println(digitalRead(dol));
+
+
 Serial.println(digitalRead(strzal));
 Serial.println("                                           ");
 Serial.println("                                           ");
 Serial.println("                                           ");
-      delay(1000);
+     // delay(1000);
   
   
 // if (digitalRead(stycznik)==HIGH){
 //   start=true;
 // }
 
-/*
+
  for (int i=0;i<15;i=i+3){
 mcp.digitalWrite(i,LOW);
   mcp.digitalWrite(i+1,HIGH);
@@ -104,8 +106,8 @@ mcp.digitalWrite(i,HIGH);
   mcp.digitalWrite(i+2,LOW);
 }
 delay(3000);
-
 */
+
  if (start==true){
    Joystick[0]=false;                             //kasowanie wychylen
    Joystick[1]=false;
@@ -119,7 +121,7 @@ delay(3000);
    left=false;
   } 
    if ((digitalRead(lewo)==HIGH)&& (left==false)){ 
-     Joystick[0]=true;
+     Joystick[2]=true;
      left=true;
    }
    
@@ -127,7 +129,7 @@ delay(3000);
    right=false;
   } 
    if ((digitalRead(prawo)==HIGH)&& (right==false)){ 
-     Joystick[1]=true;
+     Joystick[3]=true;
      right=true;
    }
    
@@ -135,7 +137,7 @@ delay(3000);
    up=false;
   } 
    if ((digitalRead(gora)==HIGH)&& (up==false)){ 
-     Joystick[2]=true;
+     Joystick[0]=true;
      up=true;
    }
    
@@ -143,7 +145,7 @@ delay(3000);
    down=false;
   } 
    if ((digitalRead(dol)==HIGH)&& (down==false)){ 
-     Joystick[3]=true;
+     Joystick[1]=true;
      down=true;
    }
    
@@ -159,39 +161,99 @@ delay(3000);
     strzelaj_boki=true;
      x=random(0,4);
     odliczanie_strzal_boki=millis();
-  mcp.digitalWrite(0*x,HIGH);
-   mcp.digitalWrite(1*x,HIGH);
-mcp.digitalWrite(2*x,LOW);  
+  mcp.digitalWrite(0+x*3,HIGH);
+   mcp.digitalWrite(1+x*3,HIGH);
+mcp.digitalWrite(2+x*3,LOW);  
 }
   if (((millis()-odliczanie_strzal_boki>czas_na_strzal_boki)&&(strzelaj_boki==true)) || ((strzelaj_boki==false)&&(Joystick[x]==true))){
-  mcp.digitalWrite(0*x,LOW);
-   mcp.digitalWrite(1*x,HIGH);
-mcp.digitalWrite(2*x,HIGH);
+  mcp.digitalWrite(0+x*3,LOW);
+   mcp.digitalWrite(1+x*3,HIGH);
+mcp.digitalWrite(2+x*3,HIGH);
    po_strzale_boki=millis();
    strzelaj_boki=false;
    pauza_strzelania_boki=true;
    wygaszenie_strzal_boki=true;
    wygaszenie_boki=true;
+   poziom-=5;
  }
+ if ((x!=0)&&(Joystick[0]==true)){
+    mcp.digitalWrite(0,LOW);
+   mcp.digitalWrite(1,HIGH);
+mcp.digitalWrite(2,HIGH);
+mcp.digitalWrite(0+x*3,HIGH);
+   mcp.digitalWrite(1+x*3,HIGH);
+mcp.digitalWrite(2+x*3,HIGH);  
+     po_strzale_boki=millis();
+   strzelaj_boki=false;
+   pauza_strzelania_boki=true;
+   wygaszenie_strzal_boki=true;
+   wygaszenie_boki=true;
+   poziom-=5;
+ }
+  if ((x!=1)&&(Joystick[1]==true)){
+    mcp.digitalWrite(3,LOW);
+   mcp.digitalWrite(4,HIGH);
+mcp.digitalWrite(5,HIGH);
+mcp.digitalWrite(0+x*3,HIGH);
+   mcp.digitalWrite(1+x*3,HIGH);
+mcp.digitalWrite(2+x*3,HIGH);  
+     po_strzale_boki=millis();
+   strzelaj_boki=false;
+   pauza_strzelania_boki=true;
+   wygaszenie_strzal_boki=true;
+   wygaszenie_boki=true;
+   poziom-=5;
+ }
+  if ((x!=2)&&(Joystick[2]==true)){
+    mcp.digitalWrite(6,LOW);
+   mcp.digitalWrite(7,HIGH);
+mcp.digitalWrite(8,HIGH);
+mcp.digitalWrite(0+x*3,HIGH);
+   mcp.digitalWrite(1+x*3,HIGH);
+mcp.digitalWrite(2+x*3,HIGH);  
+     po_strzale_boki=millis();
+   strzelaj_boki=false;
+   pauza_strzelania_boki=true;
+   wygaszenie_strzal_boki=true;
+   wygaszenie_boki=true;
+   poziom-=5;
+ }
+  if ((x!=3)&&(Joystick[3]==true)){
+    mcp.digitalWrite(9,LOW);
+   mcp.digitalWrite(10,HIGH);
+mcp.digitalWrite(11,HIGH);
+mcp.digitalWrite(0+x*3,HIGH);
+   mcp.digitalWrite(1+x*3,HIGH);
+mcp.digitalWrite(2+x*3,HIGH);  
+     po_strzale_boki=millis();
+   strzelaj_boki=false;
+   pauza_strzelania_boki=true;
+   wygaszenie_strzal_boki=true;
+   wygaszenie_boki=true;
+   poziom-=5;
+ }
+ 
    if ((strzelaj_boki==true) && (Joystick[x]==true)){
   strzelaj_boki=false;
-   mcp.digitalWrite(0*x,HIGH);
-   mcp.digitalWrite(1*x,LOW);
-mcp.digitalWrite(2*x,HIGH); 
+   mcp.digitalWrite(0+x*3,HIGH);
+   mcp.digitalWrite(1+x*3,LOW);
+mcp.digitalWrite(2+x*3,HIGH); 
 pauza_strzelania_boki=true;
 po_strzale_boki=millis();
   wygaszenie_strzal_boki=true;
      wygaszenie_boki=true;
+     
+     poziom+=5;
   }
    if (((millis()-po_strzale_boki>czas_po_strzale_boki)&&(strzelaj_boki==false))&& (wygaszenie_strzal_boki==true)){
-   mcp.digitalWrite(0*x,HIGH);
-   mcp.digitalWrite(1*x,HIGH);
-mcp.digitalWrite(2*x,HIGH);
+  for (int i=0;i<12;i++){
+     mcp.digitalWrite(i,HIGH);
+  }
   wygaszenie_strzal_boki=false;
  }
 if (wygaszenie_boki==true){
 wygaszenie_boki=false;
-czas_pauzy_pomiedzy_strzalami_boki=random(900,2400);
+czas_pauzy_pomiedzy_strzalami_boki=random(400,900);
  czas_pauza_strzelanie_boki=millis();
 }
  if ((millis()-czas_pauza_strzelanie_boki>czas_pauzy_pomiedzy_strzalami_boki)&&(pauza_strzelania_boki==true)){
@@ -221,6 +283,7 @@ mcp.digitalWrite(14,HIGH);
    pauza_strzelania=true;
    wygaszenie_strzal=true;
    wygaszenie=true;
+   poziom-=5;
  }
                                                                 // jezeli strzal dobrze
    if ((strzelaj==true) && (Joystick[4]==true)){
@@ -232,6 +295,7 @@ pauza_strzelania=true;
 po_strzale=millis();
   wygaszenie_strzal=true;
      wygaszenie=true;
+    poziom+=5;
   }
                                                                     // wygaszenie po bledzie lub dobrze
    if (((millis()-po_strzale>czas_po_strzale)&&(strzelaj==false))&& (wygaszenie_strzal==true)){
@@ -250,5 +314,8 @@ czas_pauzy_pomiedzy_strzalami=random(2200,3800);
    pauza_strzelania=false;
  }
  }
+ if (poziom<=128) poziom=128;
+ if (poziom>=170)poziom=170;
+ Serial.println(poziom);
 
 }
