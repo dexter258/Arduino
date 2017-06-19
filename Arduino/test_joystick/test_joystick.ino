@@ -7,7 +7,7 @@ Adafruit_MCP23017 mcp;
 #define gora 6
 #define dol 7
 #define strzal 8
-$define stycznik 4
+#define stycznik 4
 byte x;
 boolean Joystick[5];
 boolean start=false;
@@ -15,8 +15,17 @@ boolean left=false;
 boolean right=false;
 boolean up=false;
 boolean down=false;
+boolean fire=false;
 boolean wylosowano=false;
 boolean strzelaj=false;
+boolean pauza_strzelania=false;
+boolean wygaszenie_strzal;
+long czas_na_strzal=2500;
+long czas_po_strzale=400;
+long po_strzale;
+long czas_pauzy_pomiedzy_strzalami=6000;
+long odliczanie_strzal;
+long  czas_pauza_strzelanie;
 void setup() {  
   mcp.begin();      // use default address 0
 for (int i=0;i<16;i++){
@@ -92,24 +101,49 @@ void loop() {
        x=random(0,4);
        wylosowano=true;
    }
-  digitalWrite(x*0
-  for (int i=0; 
+
+
   
-  
-  if ((strzelaj==false)&& (pauza_stzelania==false)){
+  if ((strzelaj==false)&& (pauza_strzelania==false)){
     strzelaj=true;
     odliczanie_strzal=millis();
-  }
-  if ((strzelaj==true) && (Joystick==true)){
+  mcp.digitalWrite(12,LOW);
+   mcp.digitalWrite(13,LOW);
+mcp.digitalWrite(14,HIGH);  
+}
+  if ((strzelaj==true) && (Joystick[4]==true)){
   strzelaj=false;
+   mcp.digitalWrite(12,LOW);
+   mcp.digitalWrite(13,HIGH);
+mcp.digitalWrite(14,LOW); 
+pauza_strzelania=true;
+po_strzale=millis();
+  wygaszenie_strzal=true;
   }
-  if (millis()-odliczanie_strzal>3000){
+  if (((millis()-odliczanie_strzal>czas_na_strzal)&&(strzelaj==true)) || ((strzelaj==false)&&(Joystick[4]==true))){
   mcp.digitalWrite(12,HIGH);
    mcp.digitalWrite(13,LOW);
 mcp.digitalWrite(14,LOW);
-  
-  
+   po_strzale=millis();
+   strzelaj=false;
+   pauza_strzelania=true;
+   wygaszenie_strzal=true;
  }
+   if (((millis()-po_strzale>czas_po_strzale)&&(strzelaj==false))&& (wygaszenie_strzal==true)){
+   mcp.digitalWrite(12,LOW);
+   mcp.digitalWrite(13,LOW);
+mcp.digitalWrite(14,LOW);
+wygaszenie_strzal=false;
+czas_pauzy_pomiedzy_strzalami=random(2200,4500);
+ }
+ if (pauza_strzelania==true){
+ czas_pauza_strzelanie=millis();
+ }
+ if ((millis()-czas_pauza_strzelanie>czas_pauzy_pomiedzy_strzalami)&&(pauza_strzelania==true)){
+   pauza_strzelania=false;
+ }
+ 
+ 
  }
 
 
