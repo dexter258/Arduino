@@ -27,6 +27,8 @@ void loop() {
   mcp.digitalWrite(x,LOW);  
   delay(1000);
   mcp.digitalWrite(x,HIGH); 
+  /// adwadwdawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
   
+  digitalWrite(13,HIGH);
   }
 }
