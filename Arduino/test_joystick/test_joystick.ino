@@ -24,6 +24,6 @@ pinMode(strzal,INPUT);
 
 void loop() {
 //duupa 
-//tak
+//tak adwadwad
 
 }
