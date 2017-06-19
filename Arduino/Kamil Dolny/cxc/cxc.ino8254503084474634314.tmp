@@ -1,0 +1,474 @@
+#include <Wire.h>
+#include <SPI.h>
+#include "Adafruit_MCP23017.h"
+#include "time.h"
+#include "memory.h"
+#include "errors.h"
+#include "garret.h"
+#include "start.h"
+#include "button.h"
+#include "pyrotechnics.h"
+#include "booster_engine.h"
+#include "abort.h"
+#include "event.h"
+
+byte errorSendPrev;
+bool debug = true ;
+byte error = 0;
+byte passedGames = 0;
+byte passedGamesPrev = 0;
+bool sendInfoToSymbols = false;
+bool sendInfoToSimon = false;
+bool sendInfoToLabirynth = false;
+bool sendInfoToButton = false;
+byte debugGames = 7;
+bool labirynthPass = false;
+bool debugInput = false;
+byte errorPrev = 0;
+bool simonPass = false;
+bool symbolsPass = false;
+bool sendingInfo = false;
+void setup() {
+  randomSeed(analogRead(A8));
+  SPI.begin();
+  SPI.setBitOrder(LSBFIRST);                //LSBFIRST or MSBFIRST
+  SPI.setDataMode(SPI_MODE3);               //CPOL=1 CPHA=1
+  SPI.setClockDivider(SPI_CLOCK_DIV64);  //
+  delay(20);
+  
+  
+
+  Serial.begin(9600);
+  Serial1.begin(9600); // Labirynt
+  Serial2.begin(9600); // drugie arduino
+  Serial3.begin(9600); // Symbols
+  Serial2.println("D5"); // reset Deuter
+  delay(50);
+  Serial2.println("B4"); // Wygaszenie paska button
+  resetAllGames();
+  delay(5000);
+  initBoosterEnginePanel();
+  initInfoPanel();
+  initStartPanel();
+
+  digitalWrite(48, LOW);
+  char c;
+    for (const char * p = "F000000000000000000000000000000K" ; c = *p; p++) {
+      SPI.transfer (c);
+      delay(5);
+    }
+
+    digitalWrite(48, HIGH);
+
+  initGarretPanel();
+  initButtonPanel();
+  initEventPanel();
+  initTimePanel();
+  initMemoryPanel();
+  initErrorsPanel();
+  initAbortPanel();
+  setGarretNumbers(10, 10, 10);
+  readEngineButtons();
+  
+  timer_t.attach(1, 200, checkGarret);
+  timer_t.attach(2, 200, sendButtons);
+}
+String infoButtons = "";
+
+
+void checkSerialPorts() {
+  String msg = "";
+  
+  passedGamesPrev = passedGames;
+
+  if (Serial2.available() > 0) { // Pobieranie danych z portu szeregowego
+    while (Serial2.available() > 0) { // pobieraj tak długo aż bufor będzie pusty
+      msg += char(Serial2.read());
+      delay(5);
+    }
+    if (msg[0] == 'S') {
+      passedGames++;
+      simonPass = true;
+    }
+    else if (msg[0] == 'E') {
+      error++;
+    }
+    else {
+      infoButtons = msg;
+
+    }
+
+    if (debugInput == true) Serial.println(msg);
+
+  }
+  msg = "";
+  if (Serial1.available() > 0) { // Pobieranie danych z portu szeregowego
+    while (Serial1.available() > 0) { // pobieraj tak długo aż bufor będzie pusty
+      msg += char(Serial1.read());
+      delay(5);
+    }
+
+    if (msg[0] == 'P') {
+      passedGames++;
+      labirynthPass = true;
+    }
+    else if (msg[0] == 'E') {
+      error++;
+    }
+  }
+
+  msg = "";
+  if (Serial3.available() > 0) { // Pobieranie danych z portu szeregowego
+    while (Serial3.available() > 0) { // pobieraj tak długo aż bufor będzie pusty
+      msg += char(Serial3.read());
+      delay(5);
+    }
+
+    if (msg[0] == 'P') {
+      passedGames++;
+      symbolsPass = true;
+    }
+    else if (msg[0] == 'E') {
+      error++;
+    }
+  }
+
+}
+
+void loop() {
+
+  //Serial.println(readPotValue());
+  checkSerialPorts();
+  setButtons(infoButtons);
+  readEngineButtons();
+
+  //setEngineLeds();
+  if (gameStarted == false || restartGame == true) {
+
+    readStartButton(); // Sprawdzenie czy przekręcono kluczyk start
+  }
+
+  if (gameStarted == true || debugGames != 10) { // Jeśli przekręcono kluczyk start
+
+    //======GARRET GAME======//
+
+    if (startGames[0] == true && garretPass == false || debugGames == 0) {
+
+      if (garretFlag == false) {
+        setGarretNumbers(0, 0, 0);
+        garretFlag = true;
+      }
+      if ( readAcceptGarret()) {
+
+        garretGame();
+
+      }
+
+      if (garretPass == true) {
+        setGarretNumbers(10, 10, 10);
+      }
+    }
+    //END GARRET GAME
+
+    //======SYMBOLS GAME=====//
+    if (startGames[1] == true  && symbolsPass == false || debugGames == 1) {
+
+        if(sendInfoToSymbols == false){
+          Serial3.println("1");
+          sendInfoToSymbols = true;
+          
+        }
+
+    }
+    //END SYMBOLS GAME
+
+    //======ENGINE GAME======//
+    if (startGames[2] == true && enginePass == false || debugGames == 2) {
+
+      if (enginePass == false) {
+        engineGame();
+      }
+
+      if (enginePass == true) {
+        passedGames++;
+        mcp2.digitalWrite(12, LOW);
+        mcp2.digitalWrite(13, LOW);
+        mcp2.digitalWrite(14, LOW);
+      }
+
+    }
+    //END ENGINE GAME
+
+    //======LABIRYNTH GAME======//
+    if (startGames[3] == true && labirynthPass == false || debugGames == 3) {
+
+      if (sendInfoToLabirynth == false) {
+        Serial1.println("1");
+        sendInfoToLabirynth = true;
+      }
+
+    }
+    //END LABIRYNTH GAME
+
+    //======PYROTECHNICS GAME======//
+    if (startGames[4] == true && pyroPass == false || debugGames == 4 ) {
+      if (pyroPass == false) {
+        pyrotechnicsGame();
+      }
+
+      if (pyroPass == true) {
+        passedGames++;
+        if (debug == true) Serial.println("Zaliczone pyro");
+      }
+
+    }
+    //END PYROTECHNICS GAME
+
+    //======MEMORY GAME======//
+    if (startGames[5] == true && memoryPass == false || debugGames == 5) {
+      if (memoryPass == false) {
+        memoryGame();
+      }
+      if (memoryPass == true) {
+        passedGames ++;
+      }
+
+    }
+    //END MEMORY GAME
+
+    //======BUTTON GAME======//
+    if (startGames[6] == true && buttonPass == false || debugGames == 6) {
+
+      if (sendInfoToButton == false) {
+        sendingInfo = true;
+        delay(50);
+        randomButtonTextColor();
+        delay(50);
+        sendingInfo = false;
+        sendInfoToButton = true;
+      }
+      if (buttonPass == false) {
+
+        buttonGame();
+        if (buttonPass == true) {
+          lcd_button.clear();
+          //lcd_button.setCursor(0, 0);
+          //lcd_button.print("Zaliczono");
+          sendingInfo = true;
+          delay(50);
+          Serial2.println("B" + String(4));
+          delay(50);
+          sendingInfo = false;
+        }
+      }
+    }
+
+    //END BUTTON GAME
+
+    //======ABORT GAME======//
+    if (startGames[7] == true  && abortPass == false || debugGames == 7) {
+      if (abortPass == false) {
+        abortGame();
+      }
+
+      if (abortPass == true) {
+        passedGames++;
+      }
+    }
+    //END ABORT GAME
+
+    //======SIMON SAYS GAME======//
+    if (startGames[8] == true || debugGames == 8) {
+
+      if (sendInfoToSimon == false) {
+        sendingInfo = true;
+        delay(50);
+        if (mainInfoText[randomMainInfo][3] == "Y") {
+          Serial2.println("S1Y");
+        }
+        else {
+          Serial2.println("S1N");
+        }
+        sendingInfo = false;
+        sendInfoToSimon = true;
+      }
+
+    }
+
+    //END SIMON SAYS GAME
+  }
+
+  timer_t.process();
+
+
+  if (passedGames > passedGamesPrev) {
+    if (debug == true) {
+      Serial.println("Punkty = " + String(passedGames));
+    }
+  }
+
+
+  if (error > errorPrev) {
+    setErrors(error);
+  }
+
+  errorPrev = error;
+
+  if (error >= 3 || gameOver == true) {
+    if(gameOver == false) {
+      delay(500);
+    }
+    gameOver = false;
+    resetAllGames();
+    restartGame = true;
+    passedGames = 0;
+    sendInfoToSymbols = false;
+    sendInfoToSimon = false;
+    sendInfoToLabirynth = false;
+    sendInfoToButton = false;
+    readStartButton();
+    //randomNumber();
+    error = 0;
+    setErrors(error);
+    errorPrev = 0;
+
+
+  }
+}
+
+void resetAllGames() {
+  //Garret
+
+  sendingInfo = true;
+
+  for (byte i = 0; i < 3; i++) {
+    garretNumberButton[i] = 0; // Wyzerowanie liczb w garret
+  }
+
+  setGarretNumbers(10, 10, 10); // wyłączenie liczników
+  garretPass = false;
+  garretFlag = false;
+
+  // Symbols
+
+    symbolsPass = false;
+    sendInfoToSymbols = false;
+    Serial3.println("R");
+
+  // ENGINE
+  enginePass = false;
+
+
+  // Labirynth
+  labirynthPass = false;
+  sendInfoToLabirynth = false;
+  Serial1.println("R");
+  //Pyrotechnics
+
+  pyroPass = false;
+
+  // MEMORY
+
+  setNumbersMemory(10, 10, 10, 10, 10);
+  //setMemoryLevel(0);
+  memoryPass = false;
+  memoryFlag = true;
+  memoryLevel = 1;
+  setMemoryLevel(0);
+  //
+
+  //BUTTON
+
+  buttonPass = false;
+  lcd_button.clear();
+  sendInfoToButton = false;
+  Serial2.println("B" + String(4));
+  delay(50);
+
+  //ABORT
+
+  //SIMON SAYS
+  simonPass = false;
+  sendInfoToSimon = false;
+  Serial2.println("S0");
+  delay(50);
+
+
+
+  sendingInfo = false;
+}
+void setButtons(String info) {
+
+  //Zczytanie wartości przyciskow Garret
+  readGarretButtons(info);
+  readButtonButton(info);
+  readPyroButtons(info);
+  readAbortButtons(info);
+  readEventButtons(info);
+
+
+}
+
+void sendButtons(){
+  
+  String temp = "R";
+  char temp2[32];
+  //Błąd
+  if(errorSendPrev < error){
+   temp += "1"; 
+  }
+  else{
+    temp += "0";
+  }
+  errorSendPrev = error;
+
+  //Pyrotechnics
+  for(byte i = 0; i < 7; i++){
+    temp += String(pyroButtonFirst[i]);
+  }
+
+  // ENGINE
+  for(byte i = 0; i <3; i++){
+    temp += String(engineButtonFirst[i]);
+  }
+
+  // BOOSTER
+
+  for(byte i = 0; i < 9 ; i++){
+    temp += String(boosterButton[i]);
+  }
+
+
+  //EVENT
+
+  for(byte i = 0; i < 10; i++){
+    temp+= String(eventButton[i]);
+  }
+
+  //CONTROL
+
+  //To jest jeszcze do zrobiebia
+  
+  if(debug == true) Serial.println(temp);
+
+  
+    temp.toCharArray(temp2, 33);
+
+
+    temp2[30] = 'K';
+    //charBuf[32] = '\0';
+    
+    digitalWrite(48, LOW);
+
+    char c;
+    for (const char * p = temp2 ; c = *p; p++) {
+      SPI.transfer (c);
+      delayMicroseconds(2000);
+    }
+
+
+
+    //SPI.transfer ('K');
+    digitalWrite(48, HIGH);
+}
+

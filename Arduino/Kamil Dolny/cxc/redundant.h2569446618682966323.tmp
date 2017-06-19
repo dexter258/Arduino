@@ -1,0 +1,9 @@
+void initRedundant() {
+  pinMode(A3, INPUT_PULLUP);
+  //digitalWrite(A3, HIGH);
+}
+
+int readRKey() {
+  return analogRead(A3);
+}
+

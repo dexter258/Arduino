@@ -1,0 +1,136 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd_button(12, 8, 5, 4, 3, 2);
+
+String buttonText[4] = {"Hold", "Press", "Abort", "Detonate"};
+byte randomTextButton;
+byte randomColorButton;
+
+extern byte error;
+extern byte randomAddInfo;
+extern byte setMinutes;
+extern byte minutes;
+extern byte seconds;
+
+bool pressedButton;
+bool flagButton = false;
+long startButton , stopButton;
+
+bool buttonPass = false;
+void initButtonPanel() {
+  lcd_button.begin(16, 2);
+  //lcd_button.setCursor(0,0);
+  //lcd_button.print("Witaj Button");
+}
+
+void randomButtonTextColor() {
+  lcd_button.clear();
+  lcd_button.setCursor(0, 0);
+
+  randomTextButton = random(0, 4);
+  randomColorButton = random(0, 4);
+  lcd_button.print(buttonText[randomTextButton]);
+}
+
+void buttonGame() {
+
+  // Przypadek gdy wyswietla się HOLD
+  if (randomTextButton == 0) {
+    if (pressedButton == true && flagButton == false) {
+      flagButton = true;
+      startButton = millis();
+    }
+    else if (pressedButton == false && flagButton == true) {
+      flagButton = false;
+      stopButton = millis();
+
+      if ((stopButton - startButton) < 1000) {
+        buttonPass = true;
+      }
+      else {
+        error++;
+        randomButtonTextColor();
+        Serial2.print("B" + String(randomColorButton));
+      }
+
+    }
+  }
+
+
+  // Przypadek gdy wyswietli sie PRESS
+  else if (randomTextButton == 1 && randomAddInfo == 0) {
+
+    if (pressedButton == true && flagButton == false) {
+      flagButton = true;
+      startButton = millis();
+    }
+    else if (pressedButton == false && flagButton == true) {
+      flagButton = false;
+      stopButton = millis();
+
+      if ((stopButton - startButton) > 4000 && (stopButton - startButton) < 6000 ) {
+        buttonPass = true;
+      }
+      else {
+        error++;
+        randomButtonTextColor();
+        Serial2.print("B" + String(randomColorButton));
+      }
+    }
+  }
+
+  else {
+    if (pressedButton == true && flagButton == false) {
+      flagButton = true;
+
+    }
+    else if (pressedButton == false && flagButton == true && randomAddInfo == 1 && checkTime(4) && randomColorButton == 2) {
+      flagButton = false;
+      buttonPass = true;
+    }
+    else if (pressedButton == false && falgButton == true && randomColorButton == 1 && checkTime(8)) {
+      flagButton = false;
+      buttonPass = true;
+    }
+    else if(pressedButton == false && flagButton == true && randomColorButton == 3 && checkTime(5)){
+      flagButton = false;
+      buttonPass = true;
+    }
+
+    else if(pressedButton == false && flagButton == true && checkTime(1)){
+      flagButton = false;
+      buttonPass = true;
+    }
+
+    else if(pressedButton == false && flagButton == true){
+      error++;
+      randomButtonTextColor();
+      Serial2.print("B" + String(randomColorButton));
+    }
+
+
+  }
+
+}
+
+bool checkTime(byte number) {
+  byte minute = setMinutes - minutes - 1;
+  byte second = 60 - seconds;
+
+
+  if (number != 8 && (minute == number || second == 10 * number)) {
+    return true;
+  }
+
+  for (byte i = 0; i < 60; i = i + 10) {
+    if (minute == number || second == number + i) {
+      return true;
+    }
+  }
+
+  return false;
+
+
+
+
+}

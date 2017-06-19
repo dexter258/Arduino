@@ -1,0 +1,124 @@
+Adafruit_MCP23017 mcp2;
+
+extern byte error;
+extern String mainInfoText[10][6];
+extern byte randomMainInfo;
+extern String additionalInfoText[4];
+extern byte randomAddInfo;
+extern byte status1[15];
+bool engineButton[3] = {false, false, false};
+bool engineButtonPrev[3] =  {false, false, false};
+bool engineButtonFirst[3] = {false, false, false};
+byte engineError;
+
+bool activeSwitch[3] ={false, false, false};
+void initBoosterEnginePanel() {
+  mcp2.begin(2);
+  for (byte i = 0; i < 12; i++) {
+    mcp2.pinMode(i, INPUT_PULLUP);
+    mcp2.digitalWrite(i, HIGH);
+  }
+
+  for (byte i = 12; i < 15; i++) {
+    mcp2.pinMode(i, OUTPUT);
+    //delay(500);
+    mcp2.digitalWrite(i, HIGH);
+  }
+
+  for(byte i = 9; i < 12; i++){
+    engineButtonPrev[i-9] = mcp.digitalRead(i);
+  }
+}
+
+void readBoosterEngineKey() {
+  for (byte i = 0; i < 12; i++) {
+    if (mcp2.digitalRead(i) == LOW) {
+     // Serial.println("Przycisk " + String(i));
+    }
+  }
+}
+
+void setEngineLeds() {
+  mcp2.digitalWrite(12, !mcp2.digitalRead(9));
+  mcp2.digitalWrite(13, !mcp2.digitalRead(10));
+  mcp2.digitalWrite(14, !mcp2.digitalRead(11));
+
+}
+
+void readEngineButtons() {
+  for (byte i = 0; i < 3; i ++) {
+    
+    engineButtonPrev[i] = engineButtonFirst[i];
+    engineButtonFirst[i] = mcp2.digitalRead(i+9);
+    if (!engineButtonFirst[i] == true &&  !engineButtonPrev[i] == false) {
+      engineButton[i] = true;
+
+      if (debug == true) Serial.println("Button Engine " + String(i) + " = " + String(pyroButton[i]));
+    }
+    else {
+      engineButton[i] = false;
+
+
+    }
+
+
+  }
+}
+void engineGame(){
+
+  readEngineButtons();
+
+   //ENGINE I 
+
+   if(engineButton[0] == 1 && (engineButtonFirst[2] == false || mainInfoText[randomMainInfo][5] == "N")){
+      error++;
+   }
+   else if(engineButtonFirst[2] == false || mainInfoText[randomMainInfo][5] == "N"){
+    activeSwitch[0] = false;
+   }
+
+   else if(engineButton[0] == 1 && engineButtonFirst[2] == true && mainInfoText[randomMainInfo][5] == "Y"){
+    activeSwitch[0] = true;
+   }
+
+    // ENGINE II 
+
+    if(engineButton[1] == 1 && additionalInfoText[randomAddInfo] == "FKW" ){
+      error++
+    }
+    else if(additionalInfoText[randomAddInfo] == "FKW"){
+      activeSwitch[1] = false;
+    }
+
+    else if(engineButton[1] == 1 && (status1[5] != 1 || status1[9] != 1 || status1[3] == 2)){
+      error++;
+    }
+
+
+    // ENGINE III
+
+    if(engineButtonFirst[0] == false
+  
+  // ENGINE I
+  if(engineButton[0] == 1 || engineButton [1] == 1 || engineButton[2] == 1){
+    
+    if( mainInfoText[randomMainInfo][5] == "Y" && engineButtonFirst[0] == true && engineButtonFirst[1] == true){
+      engineCounter++;
+    }
+    else if(mainInfoText[randomMainInfo][5] == "N" && engineButtonFirst[0] == false){
+      engineCounter++;
+    }
+
+   // ENGINE II
+    if(additionalInfoText[randomAddInfo] != "FKW" && engineButtonFirst[1] == true){
+      engineCounter++;
+    }
+    else if(status1[5] == 1 && status1[9] == 1 && status1[3] != 2 && engineButtonFirst[1] == true){
+      engineCounter++;
+    }
+
+   
+  }
+ 
+}
+

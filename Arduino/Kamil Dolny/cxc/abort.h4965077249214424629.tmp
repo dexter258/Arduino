@@ -1,0 +1,52 @@
+extern byte amountErrorStatus2;
+bool abortButton[3] = {false, false, false}; // ABORT, SAFE, AUTO
+void initAbortPanel(){
+  pinMode(6, OUTPUT);
+  digitalWrite(6, LOW);
+
+  pinMode(A0, INPUT);
+
+  
+}
+
+void readAbortButtons(String info){
+    String temp ="";
+    for(byte i = 0; i < 3; i++){
+      temp+= info[i+10];
+      abortButton[i] = bool(temp.toInt());
+    }
+}
+String readPotValue(){
+   int temp = analogRead(A0);
+
+  if(temp <=40){
+    return "V";
+  }
+  else if(temp > 40 && temp <= 150){
+    return "S-IVB";
+  }
+
+  else if(temp> 150 && temp <= 260){
+    return "IV";
+  }
+  else if(temp > 260 && temp <= 450){
+    return "III";
+  }
+  else if(temp > 460 && temp <= 570){
+    return "II";
+  }
+  else if( temp>570 && temp <=660){
+    return "I";
+  }
+  else if(temp > 660){
+    return "PAD";
+  }
+  
+  
+}
+
+/*void abortGame(){
+
+  if(amountErrorStatus2 > 4
+}*/
+

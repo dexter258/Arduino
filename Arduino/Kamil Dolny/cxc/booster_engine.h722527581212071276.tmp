@@ -1,0 +1,72 @@
+Adafruit_MCP23017 mcp2;
+
+extern String mainInfoText[10][6];
+extern byte randomMainInfo;
+
+bool engineButton[3] = {false, false, false};
+bool engineButtonPrev[3] =  {false, false, false};
+bool engineButtonFirst[3] = {false, false, false};
+byte engineCounter;
+void initBoosterEnginePanel() {
+  mcp2.begin(2);
+  for (byte i = 0; i < 12; i++) {
+    mcp2.pinMode(i, INPUT_PULLUP);
+    mcp2.digitalWrite(i, HIGH);
+  }
+
+  for (byte i = 12; i < 15; i++) {
+    mcp2.pinMode(i, OUTPUT);
+    //delay(500);
+    mcp2.digitalWrite(i, HIGH);
+  }
+
+  for(byte i = 9; i < 12; i++){
+    engineButtonPrev[i-9] = mcp.digitalRead(i);
+  }
+}
+
+void readBoosterEngineKey() {
+  for (byte i = 0; i < 12; i++) {
+    if (mcp2.digitalRead(i) == LOW) {
+     // Serial.println("Przycisk " + String(i));
+    }
+  }
+}
+
+void setEngineLeds() {
+  mcp2.digitalWrite(12, !mcp2.digitalRead(9));
+  mcp2.digitalWrite(13, !mcp2.digitalRead(10));
+  mcp2.digitalWrite(14, !mcp2.digitalRead(11));
+
+}
+
+void readEngineButtons() {
+  for (byte i = 0; i < 3; i ++) {
+    
+    engineButtonPrev[i] = engineButtonFirst[i];
+    engineButtonFirst[i] = mcp2.digitalRead(i+9);
+    if (!engineButtonFirst[i] == true &&  !engineButtonPrev[i] == false) {
+      engineButton[i] = true;
+
+      if (debug == true) Serial.println("Button Engine " + String(i) + " = " + String(pyroButton[i]));
+    }
+    else {
+      engineButton[i] = false;
+
+
+    }
+
+
+  }
+}
+void engineGame(){
+
+  readEngineButtons();
+
+  if(engineButton[0] == 1 || engineButton [1] == 1 || engineButton[2] == 1){
+    
+    if( mainInfoText[randomMainInfo][5];
+  }
+ 
+}
+

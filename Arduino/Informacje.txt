@@ -1,0 +1,12 @@
+WYœwietlacz 7 segmentowy - testowa³em to u siebie i wszystko dzia³a³o, mo¿liwe ¿e te przejœciówka nie styka, spróbuj j¹ docisnaæ. Powinno pomóc, po stronie programu nie ma problemu.
+
+Simon says zosta³ poprawiony, przynajmniej tak mi siê wydaje. Musisz wgraæ nowy program [cxc] do g³ównego arduino (MEGA) i do tego ma³ego [cxc2] obok tego du¿ego. Pamiêtaj tylko ¿e jak bêdzie wgrywa³ program do MEGA to od³¹cz przewody które id¹ do p³ytki CONTROL, bo tam jest serial port wykorzystany i siê k³óc¹ dwa arduina. Przewód dwu¿ylowy 
+
+Co do abort, to tak jak wspomina³em, nalezy d³u¿ej przycisnaæ przycisk, arduino potrzebuje niestety trochê czasu na zczytanie, ale tego nie obejdê, Musia³bym optymalizowaæ kod, ale niestety nie mam na to czasu. 
+Jeœli chodzi o sprawdzanie warunków, to mo¿e faktycznie nie tak zczytuje warunki. Jak ustawisz w programie cxc zmienn¹ bool debug = true (znajduje siê z g³ównym pliku, u góry) to masz wtedy tryb debugowania i mo¿esz sprawdziæ czy jak ustawisz w odpowiedni¹ pozycjê i naciœniesz przycisk to czy zwróci ci odpowiedni¹ wartoœæ, jak np jest na odwrót to pod³¹cz odwrotnie kabel, mo¿liwe ¿e plus z mas¹ siê zamieni³ i daje inne wartoœci. A i pamiêtaj ¿e w trybue debugowania te¿ trzeba od³¹czyæ siê od control, bo siê bêdzie k³óciæ. Jak skoñczysz debugow¹c to z powrotem na false. 
+
+Jest jeszcze zmienna byte debugGames = 10; ustawiona w ten sposób nie debgujue ¿adnej gry, jeœli chcesz sprawdzaæ za ka¿dym razem jakaœ grê to ustawiasz odpowiedni numer. Garret 0, symbols 1, engine 2, labirynt 3, pyro 4, memory 5, button 6,  abort 7, simon says 8. Wtedy mo¿na j¹ rozwi¹zywaæ niezale¿nie od tego czy zosta³a wylosowana czy nie. 
+
+Labirytn - problem powinien zostaæ naprawiony, znalaz³em ten b³¹d chyba. Wygrywasz do leonardo program panel_labirynth_v2 i powinno w teorii ju¿ dzia³aæ
+
+Engine - tak¿e wydaje mi siê ¿e ju¿ powinno œmigaæ. 

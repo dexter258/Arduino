@@ -1,0 +1,65 @@
+#include <Wire.h>
+#include "Adafruit_MCP23017.h"
+#include "time.h"
+#include "memory.h"
+#include "errors.h"
+#include "garret.h"
+#include <SPI.h>
+#define PIN_SS 48
+#include "start.h"
+
+extern byte error = 0;
+void setup() {
+  randomSeed(analogRead(A8));
+  initTimePanel();
+  initMemoryPanel();
+  initErrorsPanel();
+  initInfoPanel();
+  initStartPanel();
+  initGarretPanel();
+  Serial.begin(9600);
+
+  
+  pinMode(PIN_SS, OUTPUT);
+  digitalWrite(PIN_SS, HIGH); 
+  SPI.begin();
+  SPI.setBitOrder(LSBFIRST);                //LSBFIRST or MSBFIRST
+  SPI.setDataMode(SPI_MODE3);               //CPOL=1 CPHA=1
+  SPI.setClockDivider(SPI_CLOCK_DIV64);  //
+   delay(20);
+}
+
+byte liczba = 0;
+void loop() {
+  
+  if(liczba > 9) liczba = 0;
+  setGarretNumbers(liczba, liczba, liczba);
+  liczba++; 
+  
+  timer_t.process();
+
+     readStartButton();
+
+    
+    if( memoryLevel < 6) memoryGame();
+
+
+    char c;
+
+  // enable Slave Select
+  digitalWrite(PIN_SS, LOW);    // SS is pin 10
+
+  // send test string
+  for (const char * p = "Hello!\n" ; c = *p; p++)
+    SPI.transfer (c);
+
+  // disable Slave Select
+  digitalWrite(PIN_SS, HIGH);
+
+  delay (1000);  // 1 seconds delay
+    
+   
+  
+ 
+}
+

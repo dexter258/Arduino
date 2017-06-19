@@ -1,0 +1,40 @@
+#include <Wire.h>
+#include "Adafruit_MCP23017.h"
+
+Adafruit_MCP23017 mcp, mcp1;
+void initLabyrinthPanel(){
+     mcp.begin(0);      // use default address 0
+     mcp1.begin(1);
+   
+   for(byte i = 0; i< 16; i++){
+      mcp1.pinMode(i, OUTPUT);
+      mcp1.digitalWrite(i, HIGH);
+   }
+
+   for(byte i = 0; i < 4; i++){
+      mcp.pinMode(i+4, OUTPUT);
+      mcp.pinMode(i+8, OUTPUT);
+
+      mcp.pinMode(i, OUTPUT);
+      mcp.pinMode(i+12, OUTPUT);
+
+      mcp.digitalWrite(i+4, LOW);
+      mcp.digitalWrite(i+8, LOW);
+
+      mcp.digitalWrite(i, HIGH);
+      mcp.digitalWrite(i+12, HIGH);
+   }
+   
+}
+
+byte labirynthCombination[6][4] = {{4, 7,   7, 5},
+                                   {2, 4,   7, 7},
+                                   {1, 2,   8, 7},
+                                   {2, 2,   4, 7},
+                                   {1, 5,   7, 8},
+                                   {2, 7,   6, 1}};
+
+
+
+                                   
+

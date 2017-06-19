@@ -1,0 +1,74 @@
+Adafruit_MCP23017 mcp, mcp1;
+
+byte firstNumber[10][8]= {      {LOW,LOW,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}, // zero
+                                {LOW,LOW,LOW,LOW,HIGH,LOW,LOW,HIGH}, // jeden
+                                {HIGH,LOW,LOW,HIGH,HIGH,HIGH,HIGH,LOW}, // dwa
+                                {HIGH,LOW,LOW,HIGH,HIGH,LOW,HIGH,HIGH}, // trzy
+                                {HIGH,LOW,HIGH,LOW,HIGH,LOW,LOW,HIGH}, // cztery
+                                {HIGH,LOW,HIGH,HIGH,LOW,LOW,HIGH,HIGH}, // pięć
+                                {HIGH,LOW,HIGH,HIGH,LOW,HIGH,HIGH,HIGH}, // sześć
+                                {LOW,LOW,LOW,HIGH,HIGH,LOW,LOW,HIGH}, // siedem
+                                {HIGH,LOW,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}, // osiem
+                                {HIGH,LOW,HIGH,HIGH,HIGH,LOW,HIGH,HIGH}, //dziewięć
+                                };
+
+byte secondNumber[10][7]= {     {LOW,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}, // zero
+                                {LOW,LOW,LOW,HIGH,LOW,LOW,HIGH}, // jeden
+                                {HIGH,LOW,HIGH,HIGH,HIGH,HIGH,LOW}, // dwa
+                                {HIGH,LOW,HIGH,HIGH,LOW,HIGH,HIGH}, // trzy
+                                {HIGH,HIGH,LOW,HIGH,LOW,LOW,HIGH}, // cztery
+                                {HIGH,HIGH,HIGH,LOW,LOW,HIGH,HIGH}, // pięć
+                                {HIGH,HIGH,HIGH,LOW,HIGH,HIGH,HIGH}, // sześć
+                                {LOW,LOW,HIGH,HIGH,LOW,LOW,HIGH}, // siedem
+                                {HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}, // osiem
+                                {HIGH,HIGH,HIGH,HIGH,LOW,HIGH,HIGH}, //dziewięć
+                                };
+
+
+void setTime(byte minutes, byte seconds){
+  String temp1="", temp2;
+  
+  
+  if(minutes < 10){
+    for(byte j = 0; j < 7; j++){
+      mcp.digitalWrite(j+9, secondNumber[minutes][j]);
+      mcp.digitalWrite(j, LOW);
+      mcp.digitalWrite(7, LOW);
+    }
+  }
+  else {
+    temp1 = String(minutes)[0];
+    temp2 = String(minutes)[1];
+    
+    for(byte j = 0; j < 8; j++){
+      mcp.digitalWrite(j, firstNumber[temp1.toInt()][j]);
+    }
+
+    for(byte j = 0; j < 7; j++){
+      mcp.digitalWrite(j+9, secondNumber[temp2.toInt()][j]);
+    }
+    
+  }
+
+  if(seconds < 10){
+    for(byte j = 0; j < 7; j++){
+      mcp1.digitalWrite(j+9, secondNumber[seconds][j]);
+      mcp1.digitalWrite(j, LOW);
+      mcp1.digitalWrite(7, LOW);
+    }
+  }
+  else {
+    temp1 = String(seconds)[0];
+    temp2 = String(seconds)[1];
+    
+    for(byte j = 0; j < 7; j++){
+      mcp1.digitalWrite(j, firstNumber[temp1.toInt()][j]);
+    }
+
+    for(byte j = 0; j < 7; j++){
+      mcp1.digitalWrite(j+9, secondNumber[temp2.toInt()][j]);
+    }
+    
+  }
+}
+

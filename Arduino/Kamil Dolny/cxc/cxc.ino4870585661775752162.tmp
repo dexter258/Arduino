@@ -1,0 +1,116 @@
+#include <Wire.h>
+#include "Adafruit_MCP23017.h"
+#include "time.h"
+#include "memory.h"
+#include "errors.h"
+#include "garret.h"
+#include "start.h"
+#include "button.h"
+
+byte error = 0;
+
+void setup(){
+ delay(5000);
+  randomSeed(analogRead(A8));
+  
+  Serial.begin(9600);
+  Serial2.begin(9600);
+  initGarretPanel();
+  initButtonPanel();
+  
+  initTimePanel();
+  initMemoryPanel();
+  initErrorsPanel();
+  initInfoPanel();
+  initStartPanel();
+ 
+  
+  timer_t.attach(1, 200, checkGarret);
+}
+
+void loop() {
+
+  //GARRET GAME 
+    if(readAcceptGarret()){ // Jeśli zostanie wcisniety przycisk accept
+      garretGame(); // sprawdzamie warunkow w funkcji 
+      Serial.println(error);
+      
+    }
+  // END OF GARRET GAME
+  String msg="";
+
+  if (Serial2.available() >0){ // Pobieranie danych z portu szeregowego
+      while (Serial2.available() > 0){ // pobieraj tak długo aż bufor będzie pusty
+        msg += char(Serial2.read());
+        delay(5);
+      }
+
+      setButtons(msg);
+     
+  }
+    
+   
+    timer_t.process();
+
+    readStartButton();
+    
+    
+    if( memoryLevel < 6) memoryGame();
+
+    setErrors(error);
+    if(error >=3) {
+      restartGame = true;
+      randomNumber();
+      error =0;    }
+}
+
+
+void setButtons(String info){
+
+  String temp1="", temp2="", temp3="";
+
+  temp1+=info[0];
+  temp2+=info[1];
+  temp3+=info[2];
+
+  garretButtonPrev[0] = garretButton[0];
+  garretButtonPrev[1] = garretButton[1];
+  garretButtonPrev[2] = garretButton[2];
+  
+  
+  garretButton[0] = bool(temp1.toInt());
+  garretButton[1] = bool(temp2.toInt());
+  garretButton[2] = bool(temp3.toInt());
+
+  if(garretButton[0] == true && garretButtonPrev[0] == false){
+    garretNumberButton[0] ++;
+    if(garretNumberButton[0] > 9)
+      garretNumberButton[0] = 0;
+    
+  }
+  if(garretButton[1] == true && garretButtonPrev[1] == false){
+    garretNumberButton[1] ++;
+     if(garretNumberButton[1] > 9)
+      garretNumberButton[1] = 0;
+    
+  }
+
+  if(garretButton[2] == true && garretButtonPrev[2] == false){
+    
+    garretNumberButton[2] ++;
+     if(garretNumberButton[2] > 9)
+      garretNumberButton[2] = 0;
+    
+  }
+
+ 
+  setGarretNumbers(garretNumberButton[0], garretNumberButton[1], garretNumberButton[2]);
+
+  temp1 = "";
+  temp1 += info[15];
+
+  pressedButton = bool(temp1.toInt());
+
+  
+      
+}

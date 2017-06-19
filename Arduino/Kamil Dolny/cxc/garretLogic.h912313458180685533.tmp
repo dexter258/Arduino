@@ -1,0 +1,27 @@
+extern byte error;
+Adafruit_MCP23017 mcp3;
+bool garretButton[3]={false, false, false};
+bool garretButtonPrev[3] = {false, false, false};
+byte garretNumberButton[3] = {0,0,0};
+
+extern byte status1[15];
+extern String mainInfoText[10][3];
+extern byte randomMainInfo;
+void garretGame(){
+
+  //Czerwony przycisk
+  if(garretNumberButton[0] == garretNumberButton[1]-2 && status1[4] != 1){
+
+    
+  }
+  else if(status1[4] == 1 && garretNumberButton[0] +1 == garretNumberButton[1]){
+    
+  }
+  else error++;
+
+  //Żółty przycisk
+  if(garretNumberButton[1] == mainInfoText[randomMainInfo][1].toInt()){
+    
+  }
+}
+

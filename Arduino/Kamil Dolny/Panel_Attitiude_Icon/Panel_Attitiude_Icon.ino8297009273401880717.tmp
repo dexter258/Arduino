@@ -1,0 +1,107 @@
+#include "Adafruit_MCP23017.h"
+
+Adafruit_MCP23017 mcp0, mcp1, mcp2, mcp3, mcp4;
+
+bool sevenSegmentDisplay[11][12] ={{0,0,1,0,1,1,1,0,0,1,1,0}, // ZERO
+                               {0,0,1,0,0,0,1,0,0,0,0,0}, // JEDEN
+                               {0,1,0,0,1,1,1,0,0,0,1,0}, // DWA
+                               {0,1,1,0,1,0,1,0,0,0,1,0}, // TRZY
+                               {0,1,1,0,0,0,1,0,0,1,0,0}, // CZTERY
+                               {0,1,1,0,1,0,0,0,0,1,1,0}, // PIĘĆ
+                               {0,1,1,0,1,1,0,0,0,1,1,0}, // SZEŚĆ
+                               {0,0,1,0,0,0,1,0,0,0,1,0}, // SIEDEM
+                               {0,1,1,0,1,1,1,0,0,1,1,0}, // OSIEM
+                               {0,1,1,0,1,0,1,0,0,1,1,0}, // DZIEWIĘĆ 
+                               {0,0,0,0,0,0,0,0,0,0,0,0}}; // NIC
+void setup() {
+  // put your setup code here, to run once:
+  mcp0.begin(0);
+  mcp1.begin(1);
+  mcp2.begin(2);
+  mcp3.begin(3);
+  mcp4.begin(4);
+
+  
+  for (byte i = 0; i < 16; i++) {
+    mcp0.pinMode(i, OUTPUT);
+    mcp0.digitalWrite(i, HIGH);
+    mcp1.pinMode(i, OUTPUT);
+    mcp1.digitalWrite(i, HIGH);
+    mcp2.pinMode(i, OUTPUT);
+    mcp2.digitalWrite(i, HIGH);
+    mcp3.pinMode(i, OUTPUT);
+    mcp4.pinMode(i, OUTPUT);
+    mcp3.digitalWrite(i, LOW);
+    mcp4.digitalWrite(i, LOW);
+  }
+  for (byte i = 2; i < 6; i++) {
+    pinMode(i, OUTPUT);
+    digitalWrite(i, LOW);
+  }
+  pinMode(A3, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  Serial.begin(9600);
+}
+byte barLeds = 0;
+byte barLedsPrev = 0;
+void loop() {
+
+   barLedsPrev = barLeds;
+   barLeds = map(analogRead(A3), 1, 1023, 36, 0);
+
+   if(barLeds > barLedsPrev && barLeds<=36){
+     setBarLeds(barLeds);
+   }
+  // put your main code here, to run repeatedly:
+  //Serial.println("A0 = " + String(analogRead(A3)) + " A1 = " + String(analogRead(A1)) + " A2 = " + String(analogRead(A2)));
+ 
+
+}
+void displayNumberPitch(int number){
+  word temp = B0;
+  if(number < 10){
+    for(byte i =0; i < 12; i++){
+      bitWrite(temp, i, sevenSegmentDisplay[i]);
+      bitWrite(temp, 0, 1);
+  }
+  else if(number => 10 && number < 100){
+    
+  }
+  else if(number >=100 && number < 1000){
+    
+  }
+  else{
+    
+  }
+}
+void setBarLeds(byte leds) {
+  mcp3.writeGPIOAB(0x0);
+  mcp4.writeGPIOAB(0x0);
+  for (byte i = 2; i < 6; i++) {
+      digitalWrite(i, LOW);
+    }
+    
+  if (leds <= 16) {
+    for (byte i = 0; i < leds; i++) {
+      mcp3.digitalWrite(i, HIGH);
+    }
+  }
+  else if (leds > 16 && leds <= 32) {
+    mcp3.writeGPIOAB(0xffff);
+    for (byte i = 0; i < leds - 16; i++) {
+      mcp4.digitalWrite(i, HIGH);
+    }
+  }
+  else {
+    mcp3.writeGPIOAB(0xffff);
+    mcp4.writeGPIOAB(0xffff);
+    for (byte i = 0; i < leds - 32; i++) {
+      digitalWrite(i+2, HIGH);
+    }
+  }
+}
+
+
+
+

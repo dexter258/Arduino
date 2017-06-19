@@ -1,0 +1,101 @@
+#include "ledsBar.h"
+#include "switches.h"
+#include "Timers.h"
+long firstStart, firstStop, secondStart, secondStop, thirdStart, thirdStop, fourthStart, fourthStop, fifthStart, fifthStop;
+bool stFlag=false, sdFlag=false, thFlag=false, fhFlag=false, ftFlag = false;
+byte random1, random2, random3, random4, random5;
+Timers<2> timer_t;
+
+
+void setAuto(){
+  
+}
+
+void setON(){
+  
+}
+void setup() {
+  // put your setup code here, to run once:
+  mcp0.begin(0);
+  mcp1.begin(1);
+  mcp2.begin(2);
+  pcf.begin(0x3F);
+
+  timer_t.attach(0, 1000, setAuto);
+  timer_t.attach(1, 2000, setON);
+  
+  for (byte i = 0; i < 16; i++) {
+    mcp0.pinMode(i, OUTPUT);
+    mcp0.digitalWrite(i, LOW);
+    mcp1.pinMode(i, OUTPUT);
+    mcp1.digitalWrite(i, LOW);
+    mcp2.pinMode(i, OUTPUT);
+    mcp2.digitalWrite(i, LOW);
+  }
+
+  for (byte i = 0; i < 6; i++) {
+    pcf.pinMode(i, OUTPUT);
+    pcf.digitalWrite(i, LOW);
+
+  }
+  for (byte i = 6; i < 8; i++) {
+    pcf.pinMode(i, OUTPUT);
+    pcf.digitalWrite(i, HIGH);
+    
+  }
+
+  for(byte i = 2; i < 12; i++){
+    pinMode(i, INPUT_PULLUP);
+  }
+  Serial.begin(9600);
+
+  randomSeed(analogRead(A0));
+  random1 = random(0,11);
+  random2 = random(0,11);
+  random3 = random(0,11);
+  random4 = random(0,11);
+  random5 = random(0,11);
+
+}
+
+void loop() {
+  timer_t.process();
+  
+  setBars(1, 2, 3, 4, 5);
+  readSwitches();
+  
+  if(stFlag == false && switches[0] != 1){
+    firstStart = millis();
+    stFlag = true;
+  }
+  if(sdFlag == false && switches[1] != 1){
+    secondStart = millis();
+    sdFlag = true;
+  }
+  if(thFlag == false && switches[2] != 1){
+    thirdStart = millis();
+    thFlag = true;
+  }
+  if(fhFlag == false && switches[3] != 1){
+    fourthStart = millis();
+    fhFlag = true;
+  }
+  if(ftFlag == false && switches[4] != 1){
+    fifthStart = millis();
+    ftFlag = true;
+  }
+
+  firstStop = millis();
+  secondStop = millis();
+  thirdStop = millis();
+  fourthStop = millis();
+  fifthStop = millis();
+  
+  if(firstStop - firstStart > 60*1000){
+    random1 = random(0,11);
+    
+  }
+
+  
+  
+}

@@ -1,0 +1,12 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd_button(12, 8, 5, 4, 3, 2);
+
+String buttonText[4] = {"Hold", "Press", "Abort", "Detonate"};
+
+void initButtonPanel(){
+  lcd_button.begin(16,2);
+  lcd_button.setCursor(0,0);
+  lcd_button.print("Witaj Button");
+}
+

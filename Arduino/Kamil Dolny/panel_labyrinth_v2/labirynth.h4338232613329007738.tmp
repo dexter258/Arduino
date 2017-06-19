@@ -1,0 +1,151 @@
+#include <Wire.h>
+#include "Adafruit_MCP23017.h"
+#include "Timers.h"
+
+Timers<1> timer_int;
+
+Adafruit_MCP23017 mcp, mcp1;
+
+byte randomLab;
+ byte setXr, setYr;
+ byte setXb, setYb;
+ byte setX, setY;
+byte labirynthCombination[6][4] = {{4, 7,   7, 5},
+                                   {2, 4,   7, 7},
+                                   {1, 2,   8, 7},
+                                   {2, 2,   4, 7},
+                                   {1, 5,   7, 8},
+                                   {2, 7,   6, 1}};
+
+
+void randomLabirynth(){
+  randomLab = random(0,6);
+  
+}
+void newLab(){
+  randomLabirynth();
+}
+void initLabyrinthPanel(){
+     mcp.begin(0);      // use default address 0
+     mcp1.begin(1);
+
+     randomSeed(A0);
+
+     timer_int.attach(0,2000, newLab);
+     
+   for(byte i = 0; i< 16; i++){
+      mcp1.pinMode(i, OUTPUT);
+      mcp1.digitalWrite(i, HIGH);
+   }
+
+   for(byte i = 0; i < 4; i++){
+      mcp.pinMode(i+4, OUTPUT);
+      mcp.pinMode(i+8, OUTPUT);
+
+      mcp.pinMode(i, OUTPUT);
+      mcp.pinMode(i+12, OUTPUT);
+
+      mcp.digitalWrite(i+4, LOW);
+      mcp.digitalWrite(i+8, LOW);
+
+      mcp.digitalWrite(i, HIGH);
+      mcp.digitalWrite(i+12, HIGH);
+   }
+   
+}
+void turnOffGreenLeds(){
+  for(byte i = 0; i < 4; i++){
+      mcp.digitalWrite(i+4, LOW);
+      mcp.digitalWrite(i+8, LOW);
+
+      mcp.digitalWrite(i, HIGH);
+      mcp.digitalWrite(i+12, HIGH);
+   }
+}
+
+
+void setGreen(byte x, byte y){
+  
+  byte setX, setY;
+  
+  
+    
+    if(x < 5) {
+        mcp.digitalWrite(x+7, HIGH);
+        setX = x+7;
+
+        
+      
+    }
+    else{
+        mcp.digitalWrite(x-1, HIGH);
+        setX = x-1;
+
+        
+      
+    }
+    
+
+      if(y < 5){
+       
+          mcp.digitalWrite(y+11, LOW);
+          setY = y+11;
+          
+      }
+      else {
+        mcp.digitalWrite(y-5, LOW);
+        setY = y-5;
+       
+      }
+;
+ mcp.digitalWrite(setX, LOW);
+ mcp.digitalWrite(setY, HIGH);
+  
+}
+
+void setBlue(byte x, byte y){
+  
+ 
+    if(x < 5) {
+        mcp.digitalWrite(x+7, HIGH);
+        setX = x+7;
+    }
+    else{
+        mcp.digitalWrite(x-1, HIGH);
+        setX = x-1;
+    }
+    
+  mcp1.digitalWrite(16-y, LOW);
+  setY = 16-y;
+
+  mcp.digitalWrite(setX, LOW);
+  mcp1.digitalWrite(setY, HIGH);
+  
+}
+
+
+void setRed(byte x, byte y){
+  
+  byte setX, setY;
+  
+  
+    
+    if(x < 5) {
+        mcp.digitalWrite(x+7, HIGH);
+        setX = x+7;
+    }
+    else{
+        mcp.digitalWrite(x-1, HIGH);
+        setX = x-1;
+     }
+
+          mcp1.digitalWrite(y-1, LOW);
+          setY = y-1;
+
+ mcp.digitalWrite(setX, LOW);
+ mcp1.digitalWrite(setY, HIGH);
+  
+}
+
+                                 
+

@@ -1,0 +1,15 @@
+#include <LiquidCrystal.h>
+LiquidCrystal lcd_Start(12, 9, 5, 4, 3, 2);
+
+void initStartPanel(){
+  lcd_Start.begin(16, 2);
+  lcd_Start.setCursor(0, 0);
+  lcd_Start.print("Witaj Start!");
+
+  pinMode(41, OUTPUT);
+  digitalWrite(41, LOW);
+
+  pinMode(43, INPUT_PULLUP);
+  
+}
+

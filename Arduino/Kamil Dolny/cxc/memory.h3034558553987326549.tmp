@@ -1,0 +1,79 @@
+Adafruit_MCP23017 mcp4, mcp5, mcp6;
+
+bool numbersMemorySmall[10][7] = {{HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,LOW}, // zero
+                               {LOW,LOW,HIGH,HIGH,LOW,LOW,LOW}, // jeden
+                               {HIGH,HIGH,LOW,HIGH,HIGH,LOW,HIGH}, // dwa
+                               {LOW,HIGH,HIGH,HIGH,HIGH,LOW,HIGH}, //trzy
+                               {LOW,LOW,HIGH,HIGH,LOW,HIGH,HIGH}, // cztery
+                               {LOW,HIGH,HIGH,LOW,HIGH,HIGH,HIGH}, // pięć
+                               {HIGH,HIGH,HIGH,LOW,HIGH,HIGH,HIGH}, // sześć
+                               {LOW,LOW,HIGH,HIGH,HIGH,LOW,LOW}, // siedem
+                               {HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}, // osiem
+                               {LOW,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}}; // dziewięć
+
+bool numbersMemoryBig[10][7] =  {   {LOW,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}, // zero
+                                {LOW,LOW,LOW,HIGH,LOW,LOW,HIGH}, // jeden
+                                {HIGH,LOW,HIGH,HIGH,HIGH,HIGH,LOW}, // dwa
+                                {HIGH,LOW,HIGH,HIGH,LOW,HIGH,HIGH}, // trzy
+                                {HIGH,HIGH,LOW,HIGH,LOW,LOW,HIGH}, // cztery
+                                {HIGH,HIGH,HIGH,LOW,LOW,HIGH,HIGH}, // pięć
+                                {HIGH,HIGH,HIGH,LOW,HIGH,HIGH,HIGH}, // sześć
+                                {LOW,LOW,HIGH,HIGH,LOW,LOW,HIGH}, // siedem
+                                {HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH}, // osiem
+                                {HIGH,HIGH,HIGH,HIGH,LOW,HIGH,HIGH}, //dziewięć
+                                };
+
+
+void setNumbersMemory(byte big, byte first, byte second){
+  //DUŻY WYŚWIETLACZ i pierwszy mały
+
+  for(byte i = 0; i< 7; i ++){
+    mcp4.digitalWrite(i,numbersMemoryBig[big][i]);
+    mcp4.digitalWrite(i+7,numbersMemorySmall[first][i]);
+  }
+
+  
+  // Drugi mały 
+  
+  mcp4.digitalWrite(14,numbersMemorySmall[second][0]); 
+  mcp4.digitalWrite(15,numbersMemorySmall[second][1]);
+  for(byte i = 0; i < 5; i++){
+    mcp5.digitalWrite(i, numbersMemorySmall[second][i+2]);
+  }
+
+  //Trzeci mały
+
+   for(byte i = 
+
+  
+}
+void initMemoryPanel(){
+  mcp4.begin(4);
+  mcp5.begin(5);
+  mcp6.begin(6);
+  for(byte i = 0; i < 16; i++){
+    mcp4.pinMode(i, OUTPUT);
+    mcp5.pinMode(i, OUTPUT);
+    mcp4.digitalWrite(i, LOW);
+    mcp5.digitalWrite(i, LOW);
+  }
+
+   for(byte i = 0; i< 4; i++){
+    mcp6.pinMode(i+8, OUTPUT);
+    mcp6.digitalWrite(i+8, LOW);
+    
+    mcp6.pinMode(i+3, INPUT);
+    
+    mcp6.pullUp(i+3, HIGH);
+   }
+
+   for(byte i = 0; i< 3; i++){
+    mcp6.pinMode(i, OUTPUT);
+    mcp6.digitalWrite(i, LOW);
+   }
+
+   mcp6.pinMode(7, OUTPUT);
+   mcp6.digitalWrite(7, LOW);
+  
+}
+
