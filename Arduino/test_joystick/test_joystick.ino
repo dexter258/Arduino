@@ -7,7 +7,7 @@ int maxx=175;
 int minn=65;
 int ilosc_pkt_odejmowanych_za_blad=5;
 int ilosc_pkt_dodawanyc_za_dobrze=5;
-
+boolean sprawdzaj=true;
 Adafruit_MCP23017 mcp;
 #define lewo A0
 #define prawo 6
@@ -119,9 +119,8 @@ delay(3000);
   
   
                                                                 /////////          POCZATEK PROGRAMU, SPRAWDZANIE CZY KLODKA JEST OTWARTA PRZEZ STYCZNIUK 
-  
-  
  
+
  if (digitalRead(stycznik)==LOW){
   start=true;
 }
@@ -131,12 +130,14 @@ else {
      mcp.digitalWrite(i,HIGH);
   }
 }
-if (digitalRead(koniec)==LOW){
-  start=false;
+
+ if (digitalRead(koniec)==LOW){
+    sprawdzaj=false;
+   start=false;
+ poziom=maxx;
 }
 
-
- if (start==true){
+ if ((start==true)&&(sprawdzaj==true)){
    Joystick[0]=false;                             //kasowanie wychylen
    Joystick[1]=false;
    Joystick[2]=false;
@@ -343,7 +344,11 @@ czas_pauzy_pomiedzy_strzalami=random(2200,3800);
  }
  }
  if (start==false)poziom=128;
- 
+  if (digitalRead(koniec)==LOW){
+  
+   start=false;
+ poziom=maxx;
+}
   if (poziom<=128) poziom=128;
  if (poziom>=maxx)poziom=maxx;
  
