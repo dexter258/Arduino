@@ -17,11 +17,13 @@ char keys[ROWS][COLS] = {
 };
 
 byte rowPins[ROWS] = { 26,27,28,29 };// Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins.
-byte colPins[COLS] = { 22,23,24,25, };// Connect keypad COL0, COL1 and COL2 to these Arduino pins.
+byte colPins[COLS] = { 22,23,24,25};// Connect keypad COL0, COL1 and COL2 to these Arduino pins.
 
 
 // Create the Keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
+
 ////////////////////////////////////////////////////////////////////////////////////
                                                                                 // usatwienia serwów 
 Servo servo_naped;  // create servo object to control a servo 
@@ -43,12 +45,13 @@ int pos = 0;    // variable to store the servo position
 
 #define elektromagnesy_przejscie 30
 #define elektromagnesy_R2D2 31
-$define elektromagnesy_szafa 32
+# define elektromagnesy_szafa 32
 
-
+int incomingByte = 0;
 void setup(){
 
   Serial.begin(9600);
+  Serial1.begin(9600);
   keypad.addEventListener(keypadEvent); //add an event listener for this keypad
   
   
@@ -69,16 +72,27 @@ void setup(){
 
 void loop(){
   keypad.getKey();
+  
+     if (Serial1.available() > 0) {
+                // read the incoming byte:
+                incomingByte = Serial1.read();
+
+                // say what you got:
+                Serial.print("I received: ");
+                Serial.println(incomingByte, DEC);
+     }
    if (start==true){
       servo_blokada.write(koniec_blokada);
      delay(1000); 
    servo_naped.write(koniec_naped); 
     servo_blokada.detach();  
   }
+  
+
 }
 
 //take care of some special events
-void keypadEvent(KeypadEvent eKey){
+void keypadEvent(KeypadEvent eKey){s
   switch (keypad.getState()){
     case PRESSED:
 	Serial.print("Pressed: ");
@@ -103,6 +117,7 @@ void checkPassword(){
     //add code to run if it did not work
   }
   if (password2.evaluate()){
+    Serial.println("zajebiscie");
      start=false;
   servo_blokada.attach(9); 
      servo_naped.write(poczatek_naped); 
