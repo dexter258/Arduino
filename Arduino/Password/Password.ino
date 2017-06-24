@@ -41,13 +41,18 @@ int pos = 0;    // variable to store the servo position
                                                                                 // elektromagnesy i ledy
  #define przycisk 7
  #define odnowa 5
- #define led 4
+ #define ledy 4
 
 #define elektromagnesy_przejscie 30
 #define elektromagnesy_R2D2 31
 # define elektromagnesy_szafa 32
-
-int incomingByte = 0;
+int suwak;
+char bluetooth = 0;
+boolean dodawaj=false;
+String inString = ""; 
+String stringi;
+boolean odczytano=false;
+int p=0;
 void setup(){
 
   Serial.begin(9600);
@@ -59,8 +64,8 @@ void setup(){
   servo_naped.attach(8);  
   pinMode(przycisk,INPUT);
    pinMode(odnowa,INPUT);
-   pinMode(led,OUTPUT);
-   analogWrite(led,0);
+   pinMode(ledy,OUTPUT);
+   analogWrite(ledy,0);
    servo_naped.write(poczatek_naped); 
      delay(2500);
     servo_blokada.write(poczatek_blokada); 
@@ -72,15 +77,44 @@ void setup(){
 
 void loop(){
   keypad.getKey();
-  
-     if (Serial1.available() > 0) {
-                // read the incoming byte:
-                incomingByte = Serial1.read();
+                                             //odczytywanie danych z bluetooth
+      while (Serial1.available() > 0) {
+              bluetooth = Serial1.read();
+    int inChar = bluetooth;
+  stringi=String(bluetooth);
+    if (isDigit(inChar)) {
+      inString += (char)inChar;
+    }
+    if(stringi=="b"){
+      Serial.println("zajebiscie alo do dupy");
+    }
+if (stringi=="y"){
+                 dodawaj=false;
+                 p=0;
+                 odczytano=true;          
+               }
+               if (dodawaj==true){
+                 if (p==0){
+               suwak=stringi.toInt();
+                 }
+                 if (p==1){
+                   suwak=suwak*10+stringi.toInt();
+                 }
+               p++;
+               }
+    if (stringi=="x"){
+                 dodawaj=true;
+               }
 
-                // say what you got:
-                Serial.print("I received: ");
-                Serial.println(incomingByte, DEC);
-     }
+ if (odczytano==true) {
+analogWrite(ledy,suwak);                                   //przypisywanie odczytywanej wartosci rozjasnienia ledów od pozycji suwaka na tablecie
+Serial.println(suwak);
+ odczytano=false;
+ suwak=0;
+    }
+    stringi="";
+  }
+  
    if (start==true){
       servo_blokada.write(koniec_blokada);
      delay(1000); 
@@ -92,7 +126,7 @@ void loop(){
 }
 
 //take care of some special events
-void keypadEvent(KeypadEvent eKey){s
+void keypadEvent(KeypadEvent eKey){
   switch (keypad.getState()){
     case PRESSED:
 	Serial.print("Pressed: ");
@@ -111,7 +145,7 @@ void checkPassword(){
    start=true;
          servo_blokada.attach(9);  
   servo_naped.attach(8);  
-  analogWrite(led,200);
+  analogWrite(ledy,200);
   }else{
     Serial.println("Wrong");
     //add code to run if it did not work
@@ -127,6 +161,6 @@ void checkPassword(){
    delay(1800);
  //   servo_blokada.detach();  
   servo_naped.detach(); 
-  analogWrite(led,0);
+  analogWrite(ledy,0);
   }
 }
